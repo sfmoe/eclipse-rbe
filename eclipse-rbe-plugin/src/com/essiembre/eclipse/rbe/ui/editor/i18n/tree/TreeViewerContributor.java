@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import com.essiembre.eclipse.rbe.RBEPlugin;
+import com.essiembre.eclipse.rbe.model.bundle.BundleEntry;
 import com.essiembre.eclipse.rbe.model.bundle.BundleGroup;
 import com.essiembre.eclipse.rbe.model.tree.KeyTree;
 import com.essiembre.eclipse.rbe.model.tree.KeyTreeItem;
@@ -62,16 +63,20 @@ public class TreeViewerContributor {
     public static final int KT_INCOMPLETE   = 2;  // 1th bit set
     
     
-    public  static final int MENU_NEW       = 0 ;
-    public  static final int MENU_RENAME    = 1 ;
-    public  static final int MENU_DELETE    = 2 ;
-    public  static final int MENU_COPY      = 3 ;
-    public  static final int MENU_COMMENT   = 4 ;
-    public  static final int MENU_UNCOMMENT = 5 ;
-    public  static final int MENU_EXPAND    = 6 ;
-    public  static final int MENU_COLLAPSE  = 7 ;
-    public  static final int MENU_GETKEY    = 8 ;
-    private static final int MENU_COUNT     = 9 ;
+    public  static final int MENU_NEW         = 0 ;
+    public  static final int MENU_RENAME      = 1 ;
+    public  static final int MENU_DELETE      = 2 ;
+    public  static final int MENU_COPY        = 3 ;
+    public  static final int MENU_COMMENT     = 4 ;
+    public  static final int MENU_UNCOMMENT   = 5 ;
+    public  static final int MENU_EXPAND      = 6 ;
+    public  static final int MENU_COLLAPSE    = 7 ;
+    public  static final int MENU_GETKEYID    = 8 ;
+    private static final int MENU_GETKEY      = 9;
+    private static final int MENU_GETKEYGROUP = 10;
+    private static final int MENU_COUNT       = 11;
+
+    
    
 
 
@@ -188,15 +193,31 @@ public class TreeViewerContributor {
         
         actions[MENU_COLLAPSE].setText(RBEPlugin.getString("key.collapseAll"));
 
-        actions[MENU_GETKEY] = new Action () {
+        actions[MENU_GETKEYID] = new Action () {
             @Override
             public void run() {
                 copyKeyID();
             }
         };
-        actions[MENU_GETKEY].setText(RBEPlugin.getString("key.getkey"));
+        actions[MENU_GETKEYID].setText(RBEPlugin.getString("key.getKeyID"));
 
 
+        actions[MENU_GETKEY] = new Action () {
+            @Override
+            public void run() {
+            	copyKeyAndValue();
+            }
+        };
+        actions[MENU_GETKEY].setText(RBEPlugin.getString("key.getKey"));
+        
+        
+        actions[MENU_GETKEYGROUP] = new Action () {
+            @Override
+            public void run() {
+            	copyKeyAndValueGroup();
+            }
+        };
+        actions[MENU_GETKEYGROUP].setText(RBEPlugin.getString("key.getKeyGroup"));
 
     }
 
@@ -214,8 +235,12 @@ public class TreeViewerContributor {
         manager.add(actions[MENU_UNCOMMENT]);
         actions[MENU_UNCOMMENT].setEnabled(selectedItem != null);
         manager.add(separator);
+        manager.add(actions[MENU_GETKEYID]);
+        actions[MENU_GETKEY].setEnabled(selectedItem != null);
         manager.add(actions[MENU_GETKEY]);
         actions[MENU_GETKEY].setEnabled(selectedItem != null);
+        manager.add(actions[MENU_GETKEYGROUP]);
+        actions[MENU_GETKEYGROUP].setEnabled(selectedItem != null);
         manager.add(separator);        
         manager.add(actions[MENU_EXPAND]);
         manager.add(actions[MENU_COLLAPSE]);
@@ -434,7 +459,7 @@ public class TreeViewerContributor {
 
 
     /**
-     * Copies a key or group of key.
+     * Copies a key ID.
      */
     protected void copyKeyID() {
         KeyTreeItem selectedItem = getSelection();
@@ -445,10 +470,22 @@ public class TreeViewerContributor {
         clip.setContents(selectKey, selectKey);
         
     }
+    /**
+     * Copies a group of keys and/or children to Clipboard.
+     */    
+    protected void copyKeyAndValue() {
+    	KeyTreeItem selectedItem = getSelection();
+    	String key = selectedItem.getId();
+    	BundleGroup bundleGroup = tree.getBundleGroup(); 
+    	Collection<BundleEntry> content = bundleGroup.getBundleEntries(key);
+    	InputDialog dialog = new InputDialog(
+                getShell(), key, content.toString(), null, null);
+        dialog.open();
+    }
     
-    
-    
-    
+    protected void copyKeyAndValueGroup(){
+    	
+    }
     
     /**
      * Returns the currently used Shell instance.
